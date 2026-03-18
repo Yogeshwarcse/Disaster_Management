@@ -112,8 +112,12 @@ router.delete('/inventory/:id', async (req, res) => {
 // =======================
 router.get('/centers', async (req, res) => {
   try {
-    const centers = await Center.find({}, '-_id -__v -createdAt -updatedAt');
-    res.json(centers);
+    if (isDbConnected()) {
+      const centers = await Center.find({}, '-_id -__v -createdAt -updatedAt');
+      res.json(centers);
+    } else {
+      res.json(memoryCenters);
+    }
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -179,8 +183,12 @@ router.delete('/centers/:id', async (req, res) => {
 // =======================
 router.get('/volunteers', async (req, res) => {
   try {
-    const volunteers = await Volunteer.find({}, '-_id -__v -createdAt -updatedAt');
-    res.json(volunteers);
+    if (isDbConnected()) {
+      const volunteers = await Volunteer.find({}, '-_id -__v -createdAt -updatedAt');
+      res.json(volunteers);
+    } else {
+      res.json(memoryVolunteers);
+    }
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -222,8 +230,12 @@ router.put('/volunteers/:id', async (req, res) => {
 // =======================
 router.get('/dispatches', async (req, res) => {
   try {
-    const dispatches = await Dispatch.find({}, '-_id -__v -createdAt -updatedAt');
-    res.json(dispatches);
+    if (isDbConnected()) {
+      const dispatches = await Dispatch.find({}, '-_id -__v -createdAt -updatedAt');
+      res.json(dispatches);
+    } else {
+      res.json(memoryDispatches);
+    }
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

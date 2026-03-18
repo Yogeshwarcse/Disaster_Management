@@ -15,6 +15,12 @@ const PORT = process.env.PORT || 5000;
 // Middleware
 app.use(cors());
 app.use(express.json());
+app.use((req, res, next) => {
+  res.on('finish', () => {
+    console.log(`${new Date().toISOString()} - ${req.method} ${req.url} - ${res.statusCode}`);
+  });
+  next();
+});
 
 // Routes
 app.use('/api', apiRoutes);

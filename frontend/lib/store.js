@@ -2,7 +2,7 @@
 import { create } from 'zustand'
 import { PriorityQueue } from './algorithms'
 
-const API_BASE_URL = 'http://localhost:5000/api';
+const API_BASE_URL = 'http://127.0.0.1:5000/api';
 
 export const useStore = create((set, get) => ({
   inventory: [],
@@ -21,9 +21,15 @@ export const useStore = create((set, get) => ({
       if (!res.ok) throw new Error('Failed to fetch data')
       const data = await res.json()
       
-      // Normalize MongoDB _id to id for all collections
+      // Normalize MongoDB _id and handle dates
       const normalizeData = (collection) => 
-        (collection || []).map(item => ({...item, id: item.id || item._id}))
+        (collection || []).map(item => ({
+          ...item, 
+          id: item.id || item._id,
+          timestamp: item.timestamp ? new Date(item.timestamp) : undefined,
+          lastUpdated: item.lastUpdated ? new Date(item.lastUpdated) : undefined,
+          estimatedArrival: item.estimatedArrival ? new Date(item.estimatedArrival) : undefined
+        }))
 
       set({ 
         inventory: normalizeData(data.inventory),
