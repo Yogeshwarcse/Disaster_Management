@@ -2,7 +2,13 @@
 import { create } from 'zustand'
 import { PriorityQueue } from './algorithms'
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5000/api';
+const getApiBaseUrl = () => {
+  let base = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5000';
+  if (base.endsWith('/')) base = base.slice(0, -1);
+  return base.endsWith('/api') ? base : `${base}/api`;
+};
+
+const API_BASE_URL = getApiBaseUrl();
 
 export const useStore = create((set, get) => ({
   inventory: [],
