@@ -1,32 +1,20 @@
 import mongoose from 'mongoose';
 
 const connectDB = async () => {
+  const uri = process.env.MONGODB_URI;
+  
+  if (!uri) {
+    console.error('FATAL ERROR: MONGODB_URI is not defined in .env file');
+    process.exit(1);
+  }
+
   try {
-    const atlasUri = process.env.MONGODB_URI;
-    const localUri = 'mongodb://127.0.0.1:27017/disaster-relief';
-    
-    let conn;
-    
-    // If an Atlas URI is provided in .env, try that FIRST
-    if (atlasUri) {
-      try {
-        console.log('Connecting to MongoDB Atlas...');
-        conn = await mongoose.connect(atlasUri);
-        console.log(`MongoDB Connected to Atlas: ${conn.connection.host}`);
-        return; // Success, exit function
-      } catch (atlasError) {
-        console.log(`Atlas connection failed: ${atlasError.message}`);
-        console.log('Falling back to local MongoDB...');
-      }
-    }
-    
-    // Try local MongoDB if Atlas failed or wasn't provided
-    conn = await mongoose.connect(localUri);
-    console.log(`MongoDB Connected Locally: ${conn.connection.host}`);
-    
+    console.log('Connecting to MongoDB Atlas...');
+    const conn = await mongoose.connect(uri);
+    console.log(`MongoDB Connected to Atlas: ${conn.connection.host}`);
   } catch (error) {
-    console.error(`MongoDB connection failed completely: ${error.message}`);
-    console.log('Continuing without database - some features may not work');
+    console.error(`MongoDB connection to Atlas failed: ${error.message}`);
+    process.exit(1);
   }
 };
 
