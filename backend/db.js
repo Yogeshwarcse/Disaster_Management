@@ -2,25 +2,31 @@ import mongoose from 'mongoose';
 
 const connectDB = async () => {
   try {
-    // Try local MongoDB first, then fall back to Atlas
+    const atlasUri = process.env.MONGODB_URI;
     const localUri = 'mongodb://127.0.0.1:27017/disaster-relief';
-    const atlasUri = process.env.MONGODB_URI || localUri;
     
     let conn;
-    try {
-      // Try local MongoDB first
-      conn = await mongoose.connect(localUri);
-      console.log(`MongoDB Connected:`);
-    } catch (localError) {
-      console.log('Local MongoDB failed, trying Atlas...');
-      // Fall back to Atlas
-      conn = await mongoose.connect(atlasUri);
-      console.log(`MongoDB Connected to Atlas: ${conn.connection.host}`);
+    
+    // If an Atlas URI is provided in .env, try that FIRST
+    if (atlasUri) {
+      try {
+        console.log('Connecting to MongoDB Atlas...');
+        conn = await mongoose.connect(atlasUri);
+        console.log(`MongoDB Connected to Atlas: ${conn.connection.host}`);
+        return; // Success, exit function
+      } catch (atlasError) {
+        console.log(`Atlas connection failed: ${atlasError.message}`);
+        console.log('Falling back to local MongoDB...');
+      }
     }
+    
+    // Try local MongoDB if Atlas failed or wasn't provided
+    conn = await mongoose.connect(localUri);
+    console.log(`MongoDB Connected Locally: ${conn.connection.host}`);
+    
   } catch (error) {
-    console.error(`MongoDB connection failed: ${error.message}`);
+    console.error(`MongoDB connection failed completely: ${error.message}`);
     console.log('Continuing without database - some features may not work');
-    // Don't exit the process, just continue without DB
   }
 };
 

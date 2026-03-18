@@ -4,10 +4,11 @@
   "description": "Backend API for Disaster Relief System",
   "main": "server.js",
   "type": "module",
-  "scripts": {
-    "start": "node server.js",
-    "dev": "nodemon server.js"
-  },
+ "scripts": {
+  "start": "node server.js",
+  "dev": "nodemon server.js",
+  "build": "echo Build step not required"
+},
   "dependencies": {
     "cors": "^2.8.6",
     "dotenv": "^17.3.1",
