@@ -12,9 +12,10 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { cn } from '@/lib/utils'
 
-export function AppHeader({ title, description }) {
-  const notifications = useStore(state => state.notifications)
-  const dismissNotification = useStore(state => state.dismissNotification)
+export function AppHeader({ title, description }: { title: string, description?: string }) {
+  const notifications = useStore((state: any) => state.notifications)
+  const dismissNotification = useStore((state: any) => state.dismissNotification)
+  const [mounted, setMounted] = useState(false)
   const [currentTime, setCurrentTime] = useState('')
   
   useEffect(() => {
@@ -31,7 +32,7 @@ export function AppHeader({ title, description }) {
   }, [])
   
   return (
-    <header className="sticky top-0 z-30 flex h-16 items-center justify-between border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 px-6">
+    <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b border-border bg-background/80 backdrop-blur-md px-6 shadow-sm">
       <div>
         <h1 className="text-lg font-semibold text-foreground">{title}</h1>
         {description && (
@@ -67,7 +68,7 @@ export function AppHeader({ title, description }) {
                 No new notifications
               </div>
             ) : (
-              notifications.slice(0, 5).map(notification => (
+              notifications.slice(0, 5).map((notification: any) => (
                 <DropdownMenuItem
                   key={notification.id}
                   className="flex items-start gap-2 p-3"

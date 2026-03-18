@@ -24,7 +24,13 @@ const EditCenterDialog = dynamic(
 )
 
 export function CenterDetailsPanel({ center, onClose }: { center: any, onClose: () => void }) {
-  const inventory = useStore(state => state.inventory)
+  const inventory = useStore((state: any) => state.inventory)
+  const dispatches = useStore((state: any) => state.dispatches)
+  const updateDispatchStatus = useStore((state: any) => state.updateDispatchStatus)
+  
+  const incomingDispatches = dispatches.filter((d: any) => 
+    d.centerId === center.id && ['pending', 'in-transit'].includes(d.status)
+  )
   
   const capacityPercentage = (center.peopleCount / center.capacity) * 100
   
@@ -151,6 +157,35 @@ export function CenterDetailsPanel({ center, onClose }: { center: any, onClose: 
             })}
           </div>
         </div>
+        
+        {/* Incoming Dispatches */}
+        {incomingDispatches.length > 0 && (
+          <div className="space-y-3">
+            <div className="flex items-center gap-2">
+              <Truck className="h-4 w-4 text-muted-foreground" />
+              <span className="text-sm font-medium">Incoming Dispatches</span>
+            </div>
+            <div className="space-y-2">
+              {incomingDispatches.map((dispatch: any) => (
+                <div key={dispatch.id} className="flex items-center justify-between rounded-lg border bg-muted/30 p-3">
+                  <div className="space-y-1">
+                    <p className="text-sm font-medium">Delivery from Warehouse</p>
+                    <p className="text-xs text-muted-foreground">
+                      Status: <span className="capitalize text-primary">{dispatch.status}</span>
+                    </p>
+                  </div>
+                  <Button 
+                    size="sm" 
+                    variant="default"
+                    onClick={() => updateDispatchStatus(dispatch.id, 'delivered')}
+                  >
+                    Mark Received
+                  </Button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
         
         {/* Priority Score Breakdown */}
         <div className="rounded-lg border bg-muted/50 p-3 space-y-2">

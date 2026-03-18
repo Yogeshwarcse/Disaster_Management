@@ -12,6 +12,14 @@ export function StatsCard({
   trend,
   trendValue,
   variant = 'default'
+}: {
+  title: string
+  value: string | number
+  description?: string
+  icon: any
+  trend?: 'up' | 'down' | 'neutral'
+  trendValue?: string
+  variant?: 'default' | 'critical' | 'warning' | 'success'
 }) {
   return (
     <Card className={cn(

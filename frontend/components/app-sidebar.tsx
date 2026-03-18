@@ -42,7 +42,7 @@ export function AppSidebar() {
   }, [inventory, centers, dispatches])
   
   return (
-    <aside className="fixed left-0 top-0 z-40 h-screen w-64 bg-sidebar border-r border-sidebar-border">
+    <aside className="fixed left-0 top-0 z-40 h-screen w-64 bg-sidebar/95 backdrop-blur-md border-r border-sidebar-border shadow-lg">
       <div className="flex h-full flex-col">
         {/* Logo */}
         <div className="flex h-16 items-center gap-3 border-b border-sidebar-border px-6">
@@ -68,8 +68,8 @@ export function AppSidebar() {
                 className={cn(
                   'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
                   isActive
-                    ? 'bg-sidebar-accent text-sidebar-primary'
-                    : 'text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground'
+                    ? 'bg-primary/15 text-primary shadow-sm ring-1 ring-primary/20'
+                    : 'text-sidebar-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-accent-foreground'
                 )}
               >
                 <Icon className="h-4 w-4" />

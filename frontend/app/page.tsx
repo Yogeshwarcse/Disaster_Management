@@ -28,14 +28,14 @@ export default function DashboardPage() {
   const dispatches = useStore(state => state.dispatches)
   
   const stats = useMemo(() => {
-    const totalInventory = inventory.reduce((sum, item) => sum + item.quantity, 0)
-    const lowStockItems = inventory.filter(item => item.quantity <= item.threshold).length
-    const criticalCenters = centers.filter(c => c.priorityScore >= 8).length
-    const activeDispatches = dispatches.filter(d => d.status === 'in-transit' || d.status === 'pending').length
+    const totalInventory = inventory.reduce((sum: number, item: any) => sum + item.quantity, 0)
+    const lowStockItems = inventory.filter((item: any) => item.quantity <= item.threshold).length
+    const criticalCenters = centers.filter((c: any) => c.priorityScore >= 8).length
+    const activeDispatches = dispatches.filter((d: any) => d.status === 'in-transit' || d.status === 'pending').length
     const averagePriorityScore = centers.length > 0 
-      ? (centers.reduce((sum, c) => sum + c.priorityScore, 0) / centers.length).toFixed(1)
+      ? (centers.reduce((sum: number, c: any) => sum + c.priorityScore, 0) / centers.length).toFixed(1)
       : '0'
-    const totalPeopleServed = centers.reduce((sum, c) => sum + c.peopleCount, 0)
+    const totalPeopleServed = centers.reduce((sum: number, c: any) => sum + c.peopleCount, 0)
     
     return {
       totalInventory,
@@ -143,14 +143,14 @@ export default function DashboardPage() {
             <RecentActivity />
             
             {/* Quick Actions */}
-            <div className="rounded-lg border bg-card p-6">
+            <div className="rounded-xl border bg-card/80 backdrop-blur-md p-6 shadow-md ring-1 ring-white/5">
               <h3 className="text-base font-medium text-foreground mb-4">Quick Actions</h3>
               <div className="grid gap-3 sm:grid-cols-2">
                 <a
                   href="/dispatch"
-                  className="flex items-center gap-3 rounded-lg border bg-background p-4 transition-colors hover:bg-accent"
+                  className="group flex items-center gap-3 rounded-xl border bg-background/50 backdrop-blur-sm p-4 transition-all hover:bg-primary/10 hover:border-primary/50 hover:shadow-md hover:shadow-primary/10"
                 >
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/20 group-hover:bg-primary/30 transition-colors">
                     <Truck className="h-5 w-5 text-primary" />
                   </div>
                   <div>
@@ -160,9 +160,9 @@ export default function DashboardPage() {
                 </a>
                 <a
                   href="/inventory"
-                  className="flex items-center gap-3 rounded-lg border bg-background p-4 transition-colors hover:bg-accent"
+                  className="group flex items-center gap-3 rounded-xl border bg-background/50 backdrop-blur-sm p-4 transition-all hover:bg-chart-3/10 hover:border-chart-3/50 hover:shadow-md hover:shadow-chart-3/10"
                 >
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-chart-3/10">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-chart-3/20 group-hover:bg-chart-3/30 transition-colors">
                     <Package className="h-5 w-5 text-chart-3" />
                   </div>
                   <div>
@@ -172,9 +172,9 @@ export default function DashboardPage() {
                 </a>
                 <a
                   href="/volunteers"
-                  className="flex items-center gap-3 rounded-lg border bg-background p-4 transition-colors hover:bg-accent"
+                  className="group flex items-center gap-3 rounded-xl border bg-background/50 backdrop-blur-sm p-4 transition-all hover:bg-chart-2/10 hover:border-chart-2/50 hover:shadow-md hover:shadow-chart-2/10"
                 >
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-chart-2/10">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-chart-2/20 group-hover:bg-chart-2/30 transition-colors">
                     <Users className="h-5 w-5 text-chart-2" />
                   </div>
                   <div>
@@ -184,9 +184,9 @@ export default function DashboardPage() {
                 </a>
                 <a
                   href="/centers"
-                  className="flex items-center gap-3 rounded-lg border bg-background p-4 transition-colors hover:bg-accent"
+                  className="group flex items-center gap-3 rounded-xl border bg-background/50 backdrop-blur-sm p-4 transition-all hover:bg-destructive/10 hover:border-destructive/50 hover:shadow-md hover:shadow-destructive/10"
                 >
-                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-destructive/10">
+                  <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-destructive/20 group-hover:bg-destructive/30 transition-colors">
                     <MapPin className="h-5 w-5 text-destructive" />
                   </div>
                   <div>
