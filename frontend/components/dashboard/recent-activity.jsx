@@ -59,7 +59,7 @@ export function RecentActivity() {
         ) : (
           <div className="space-y-4">
             {recentDispatches.map(dispatch => (
-              <div key={dispatch.id} className="flex items-start gap-3">
+              <div key={dispatch.id} className="flex items-start gap-3 p-2 rounded-xl transition-all duration-300 hover:bg-muted/50 hover:translate-x-1 cursor-pointer group">
                 <div className={cn(
                   'flex h-8 w-8 items-center justify-center rounded-lg shrink-0',
                   dispatch.status === 'delivered' && 'bg-primary/10',

@@ -153,7 +153,7 @@ export default function DashboardPage() {
               <div className="grid gap-3 sm:grid-cols-2">
                 <a
                   href="/dispatch"
-                  className="group flex items-center gap-3 rounded-xl border bg-background/50 backdrop-blur-sm p-4 transition-all hover:bg-primary/10 hover:border-primary/50 hover:shadow-md hover:shadow-primary/10"
+                  className="group flex items-center gap-3 rounded-xl border bg-background/50 backdrop-blur-sm p-4 transition-all duration-300 hover:scale-[1.03] hover:-translate-y-1 hover:bg-primary/10 hover:border-primary/50 hover:shadow-lg hover:shadow-primary/20"
                 >
                   <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/20 group-hover:bg-primary/30 transition-colors">
                     <Truck className="h-5 w-5 text-primary" />
@@ -165,7 +165,7 @@ export default function DashboardPage() {
                 </a>
                 <a
                   href="/inventory"
-                  className="group flex items-center gap-3 rounded-xl border bg-background/50 backdrop-blur-sm p-4 transition-all hover:bg-chart-3/10 hover:border-chart-3/50 hover:shadow-md hover:shadow-chart-3/10"
+                  className="group flex items-center gap-3 rounded-xl border bg-background/50 backdrop-blur-sm p-4 transition-all duration-300 hover:scale-[1.03] hover:-translate-y-1 hover:bg-chart-3/10 hover:border-chart-3/50 hover:shadow-lg hover:shadow-chart-3/20"
                 >
                   <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-chart-3/20 group-hover:bg-chart-3/30 transition-colors">
                     <Package className="h-5 w-5 text-chart-3" />
@@ -177,7 +177,7 @@ export default function DashboardPage() {
                 </a>
                 <a
                   href="/volunteers"
-                  className="group flex items-center gap-3 rounded-xl border bg-background/50 backdrop-blur-sm p-4 transition-all hover:bg-chart-2/10 hover:border-chart-2/50 hover:shadow-md hover:shadow-chart-2/10"
+                  className="group flex items-center gap-3 rounded-xl border bg-background/50 backdrop-blur-sm p-4 transition-all duration-300 hover:scale-[1.03] hover:-translate-y-1 hover:bg-chart-2/10 hover:border-chart-2/50 hover:shadow-lg hover:shadow-chart-2/20"
                 >
                   <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-chart-2/20 group-hover:bg-chart-2/30 transition-colors">
                     <Users className="h-5 w-5 text-chart-2" />
@@ -189,7 +189,7 @@ export default function DashboardPage() {
                 </a>
                 <a
                   href="/centers"
-                  className="group flex items-center gap-3 rounded-xl border bg-background/50 backdrop-blur-sm p-4 transition-all hover:bg-destructive/10 hover:border-destructive/50 hover:shadow-md hover:shadow-destructive/10"
+                  className="group flex items-center gap-3 rounded-xl border bg-background/50 backdrop-blur-sm p-4 transition-all duration-300 hover:scale-[1.03] hover:-translate-y-1 hover:bg-destructive/10 hover:border-destructive/50 hover:shadow-lg hover:shadow-destructive/20"
                 >
                   <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-destructive/20 group-hover:bg-destructive/30 transition-colors">
                     <MapPin className="h-5 w-5 text-destructive" />

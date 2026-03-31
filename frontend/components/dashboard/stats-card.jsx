@@ -15,10 +15,11 @@ export function StatsCard({
 }) {
   return (
     <Card className={cn(
-      'relative overflow-hidden',
-      variant === 'critical' && 'border-destructive/50 bg-destructive/5',
-      variant === 'warning' && 'border-chart-3/50 bg-chart-3/5',
-      variant === 'success' && 'border-primary/50 bg-primary/5'
+      'relative overflow-hidden group transition-all duration-300 hover:scale-[1.02] hover:-translate-y-1 hover:shadow-xl cursor-default',
+      variant === 'default' && 'bg-card/40 backdrop-blur-sm hover:border-primary/30 hover:shadow-primary/10',
+      variant === 'critical' && 'border-destructive/50 bg-destructive/5 hover:border-destructive/80 hover:shadow-destructive/20',
+      variant === 'warning' && 'border-chart-3/50 bg-chart-3/5 hover:border-chart-3/80 hover:shadow-chart-3/20',
+      variant === 'success' && 'border-primary/50 bg-primary/5 hover:border-primary/80 hover:shadow-primary/20'
     )}>
       <CardContent className="p-6">
         <div className="flex items-start justify-between">
