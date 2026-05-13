@@ -7,11 +7,13 @@ const volunteerSchema = new mongoose.Schema({
   email: { type: String, required: true },
   status: { type: String, enum: ['available', 'busy', 'offline'], default: 'available' },
   location: {
-    lat: { type: Number, required: false }, // Made optional in case not all have it
+    lat: { type: Number, required: false },
     lng: { type: Number, required: false }
   },
   assignedTask: { type: String, default: null },
-  skills: [{ type: String }]
+  skills: [{ type: String }],
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: 'User', default: null },
+  assignedCenters: [{ type: String }] // Array of center IDs
 }, {
   timestamps: true
 });

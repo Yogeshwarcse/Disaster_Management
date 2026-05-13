@@ -10,6 +10,23 @@ const getApiBaseUrl = () => {
 
 const API_BASE_URL = getApiBaseUrl();
 
+import { useAuthStore } from './authStore'
+
+const getHeaders = () => {
+  const token = useAuthStore.getState().token;
+  return {
+    'Content-Type': 'application/json',
+    ...(token ? { Authorization: `Bearer ${token}` } : {})
+  }
+}
+
+const getHeadersNoCT = () => {
+  const token = useAuthStore.getState().token;
+  return {
+    ...(token ? { Authorization: `Bearer ${token}` } : {})
+  }
+}
+
 export const useStore = create((set, get) => ({
   inventory: [],
   centers: [],
@@ -23,26 +40,26 @@ export const useStore = create((set, get) => ({
   init: async () => {
     set({ isLoading: true, error: null })
     try {
-      const res = await fetch(`${API_BASE_URL}/all`)
+      const res = await fetch(`${API_BASE_URL}/all`, { headers: getHeadersNoCT() })
       if (!res.ok) throw new Error('Failed to fetch data')
       const data = await res.json()
-      
+
       // Normalize MongoDB _id and handle dates
-      const normalizeData = (collection) => 
+      const normalizeData = (collection) =>
         (collection || []).map(item => ({
-          ...item, 
+          ...item,
           id: item.id || item._id,
           timestamp: item.timestamp ? new Date(item.timestamp) : undefined,
           lastUpdated: item.lastUpdated ? new Date(item.lastUpdated) : undefined,
           estimatedArrival: item.estimatedArrival ? new Date(item.estimatedArrival) : undefined
         }))
 
-      set({ 
+      set({
         inventory: normalizeData(data.inventory),
         centers: normalizeData(data.centers),
         volunteers: normalizeData(data.volunteers),
         dispatches: normalizeData(data.dispatches),
-        isLoading: false 
+        isLoading: false
       })
     } catch (error) {
       set({ error: error.message, isLoading: false })
@@ -55,7 +72,7 @@ export const useStore = create((set, get) => ({
     try {
       const res = await fetch(`${API_BASE_URL}/inventory`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getHeaders(),
         body: JSON.stringify(item),
       })
       if (!res.ok) throw new Error('Failed to add item')
@@ -71,7 +88,7 @@ export const useStore = create((set, get) => ({
     try {
       const res = await fetch(`${API_BASE_URL}/inventory/${id}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getHeaders(),
         body: JSON.stringify(updates),
       })
       if (!res.ok) throw new Error('Failed to update item')
@@ -86,7 +103,7 @@ export const useStore = create((set, get) => ({
 
   deleteInventoryItem: async (id) => {
     try {
-      const res = await fetch(`${API_BASE_URL}/inventory/${id}`, { method: 'DELETE' })
+      const res = await fetch(`${API_BASE_URL}/inventory/${id}`, { method: 'DELETE', headers: getHeadersNoCT() })
       if (!res.ok) throw new Error('Failed to delete item')
       const item = get().inventory.find(i => i.id === id)
       set(state => ({ inventory: state.inventory.filter(i => i.id !== id) }))
@@ -99,10 +116,10 @@ export const useStore = create((set, get) => ({
   bulkUpdateInventory: async (updates) => {
     try {
       // Execute all updates simultaneously
-      await Promise.all(updates.map(update => 
+      await Promise.all(updates.map(update =>
         fetch(`${API_BASE_URL}/inventory/${update.id}`, {
           method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
+          headers: getHeaders(),
           body: JSON.stringify({ quantity: update.quantity }),
         })
       ))
@@ -119,7 +136,7 @@ export const useStore = create((set, get) => ({
     try {
       const res = await fetch(`${API_BASE_URL}/centers`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getHeaders(),
         body: JSON.stringify(center),
       })
       if (!res.ok) throw new Error('Failed to add center')
@@ -135,7 +152,7 @@ export const useStore = create((set, get) => ({
     try {
       const res = await fetch(`${API_BASE_URL}/centers/${id}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getHeaders(),
         body: JSON.stringify(updates),
       })
       if (!res.ok) throw new Error('Failed to update center')
@@ -148,9 +165,29 @@ export const useStore = create((set, get) => ({
     }
   },
 
+  updateCenterInventory: async (id, updatedInventory) => {
+    try {
+      const res = await fetch(`${API_BASE_URL}/centers/${id}/inventory`, {
+        method: 'PUT',
+        headers: getHeaders(),
+        body: JSON.stringify({ inventory: updatedInventory }),
+      })
+      if (!res.ok) throw new Error('Failed to update center inventory')
+      const updatedCenter = await res.json()
+      set(state => ({
+        centers: state.centers.map(c => c.id === id ? updatedCenter : c)
+      }))
+      get().addNotification(`Inventory updated successfully`, 'success')
+      return true
+    } catch (err) {
+      get().addNotification(err.message, 'error')
+      return false
+    }
+  },
+
   deleteCenter: async (id) => {
     try {
-      const res = await fetch(`${API_BASE_URL}/centers/${id}`, { method: 'DELETE' })
+      const res = await fetch(`${API_BASE_URL}/centers/${id}`, { method: 'DELETE', headers: getHeadersNoCT() })
       if (!res.ok) throw new Error('Failed to delete center')
       const center = get().centers.find(c => c.id === id)
       set(state => ({ centers: state.centers.filter(c => c.id !== id) }))
@@ -165,7 +202,7 @@ export const useStore = create((set, get) => ({
     try {
       const res = await fetch(`${API_BASE_URL}/volunteers`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getHeaders(),
         body: JSON.stringify(volunteer),
       })
       if (!res.ok) throw new Error('Failed to add volunteer')
@@ -181,7 +218,7 @@ export const useStore = create((set, get) => ({
     try {
       const res = await fetch(`${API_BASE_URL}/volunteers/${id}`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getHeaders(),
         body: JSON.stringify(updates),
       })
       if (!res.ok) throw new Error('Failed to update volunteer')
@@ -207,20 +244,20 @@ export const useStore = create((set, get) => ({
     try {
       const res = await fetch(`${API_BASE_URL}/dispatches`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getHeaders(),
         body: JSON.stringify({ centerId, items }),
       })
-      
+
       if (!res.ok) {
         const errorData = await res.json();
         throw new Error(errorData.error || 'Failed to create dispatch')
       }
-      
+
       const newDispatch = await res.json()
-      
+
       // Fetch all data again to update inventory & volunteers correctly 
       await get().init()
-      
+
       get().addNotification(`Dispatch created successfully`, 'success')
       return newDispatch
     } catch (err) {
@@ -233,12 +270,12 @@ export const useStore = create((set, get) => ({
     try {
       const res = await fetch(`${API_BASE_URL}/dispatches/${dispatchId}/status`, {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getHeaders(),
         body: JSON.stringify({ status }),
       })
-      
+
       if (!res.ok) throw new Error('Failed to update dispatch status')
-      
+
       // A dispatch update might change volunteer status, so we refetch all
       await get().init()
       get().addNotification(`Dispatch status updated to ${status}`, 'info')
@@ -272,14 +309,14 @@ export const useStore = create((set, get) => ({
     const totalInventory = state.inventory.reduce((sum, item) => sum + item.quantity, 0)
     const criticalCenters = state.centers.filter(c => c.status === 'critical').length
     const lowStockItems = state.inventory.filter(i => i.quantity <= i.threshold).length
-    const activeDispatches = state.dispatches.filter(d => 
+    const activeDispatches = state.dispatches.filter(d =>
       d.status === 'pending' || d.status === 'in-transit'
     ).length
     const averagePriorityScore = state.centers.length > 0
       ? state.centers.reduce((sum, c) => sum + c.priorityScore, 0) / state.centers.length
       : 0
     const totalPeopleServed = state.centers.reduce((sum, c) => sum + c.peopleCount, 0)
-    
+
     return {
       totalInventory,
       totalCenters: state.centers.length,

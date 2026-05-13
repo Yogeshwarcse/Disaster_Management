@@ -25,11 +25,11 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { useStore } from '@/lib/store'
-import { 
-  Plus, 
-  Search, 
-  Users, 
-  Phone, 
+import {
+  Plus,
+  Search,
+  Users,
+  Phone,
   Mail,
   MapPin,
   Edit2,
@@ -45,20 +45,21 @@ const skillOptions = ['driving', 'first-aid', 'medical', 'logistics', 'counselin
 
 export default function VolunteersPage() {
   const volunteers = useStore(state => state.volunteers)
+  const centers = useStore(state => state.centers)
   const init = useStore(state => state.init)
-  
+
   useEffect(() => {
     init()
   }, [])
   const addVolunteer = useStore(state => state.addVolunteer)
   const updateVolunteer = useStore(state => state.updateVolunteer)
   const releaseVolunteer = useStore(state => state.releaseVolunteer)
-  
+
   const [searchTerm, setSearchTerm] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
   const [editingVolunteer, setEditingVolunteer] = useState(null)
-  
+
   // Form state
   const [formData, setFormData] = useState({
     name: '',
@@ -67,16 +68,17 @@ export default function VolunteersPage() {
     status: 'available',
     location: { lat: 37.7749, lng: -122.4194 },
     assignedTask: null,
-    skills: []
+    skills: [],
+    assignedCenters: []
   })
-  
+
   const filteredVolunteers = volunteers.filter(vol => {
     const matchesSearch = vol.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       vol.email.toLowerCase().includes(searchTerm.toLowerCase())
     const matchesStatus = statusFilter === 'all' || vol.status === statusFilter
     return matchesSearch && matchesStatus
   })
-  
+
   const handleAddVolunteer = () => {
     addVolunteer(formData)
     setFormData({
@@ -86,11 +88,12 @@ export default function VolunteersPage() {
       status: 'available',
       location: { lat: 37.7749, lng: -122.4194 },
       assignedTask: null,
-      skills: []
+      skills: [],
+      assignedCenters: []
     })
     setIsAddDialogOpen(false)
   }
-  
+
   const handleUpdateVolunteer = () => {
     if (editingVolunteer) {
       updateVolunteer(editingVolunteer.id, formData)
@@ -102,11 +105,12 @@ export default function VolunteersPage() {
         status: 'available',
         location: { lat: 37.7749, lng: -122.4194 },
         assignedTask: null,
-        skills: []
+        skills: [],
+        assignedCenters: []
       })
     }
   }
-  
+
   const startEdit = (vol) => {
     setEditingVolunteer(vol)
     setFormData({
@@ -114,12 +118,22 @@ export default function VolunteersPage() {
       phone: vol.phone,
       email: vol.email,
       status: vol.status,
-      location: vol.location,
+      location: vol.location || { lat: 37.7749, lng: -122.4194 },
       assignedTask: vol.assignedTask,
-      skills: vol.skills
+      skills: vol.skills,
+      assignedCenters: vol.assignedCenters || []
     })
   }
-  
+
+  const toggleCenter = (centerId) => {
+    setFormData(prev => ({
+      ...prev,
+      assignedCenters: prev.assignedCenters?.includes(centerId)
+        ? prev.assignedCenters.filter(c => c !== centerId)
+        : [...(prev.assignedCenters || []), centerId]
+    }))
+  }
+
   const toggleSkill = (skill) => {
     setFormData(prev => ({
       ...prev,
@@ -128,7 +142,7 @@ export default function VolunteersPage() {
         : [...prev.skills, skill]
     }))
   }
-  
+
   const getStatusColor = (status) => {
     switch (status) {
       case 'available': return 'bg-primary/10 text-primary border-primary/20'
@@ -137,7 +151,7 @@ export default function VolunteersPage() {
       default: return 'bg-muted text-muted-foreground'
     }
   }
-  
+
   const getStatusIcon = (status) => {
     switch (status) {
       case 'available': return <CheckCircle className="h-3 w-3" />
@@ -146,27 +160,27 @@ export default function VolunteersPage() {
       default: return null
     }
   }
-  
+
   const stats = {
     total: volunteers.length,
     available: volunteers.filter(v => v.status === 'available').length,
     busy: volunteers.filter(v => v.status === 'busy').length,
     offline: volunteers.filter(v => v.status === 'offline').length
   }
-  
+
   const getInitials = (name) => {
     return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)
   }
-  
+
   return (
     <div className="min-h-screen bg-background">
       <AppSidebar />
       <main className="pl-64">
-        <AppHeader 
-          title="Volunteer Management" 
+        <AppHeader
+          title="Volunteer Management"
           description="Register and manage volunteer assignments"
         />
-        
+
         <div className="p-6 space-y-6">
           {/* Stats */}
           <div className="grid gap-4 md:grid-cols-4">
@@ -215,7 +229,7 @@ export default function VolunteersPage() {
               </CardContent>
             </Card>
           </div>
-          
+
           {/* Controls */}
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="relative flex-1">
@@ -287,8 +301,8 @@ export default function VolunteersPage() {
                         type="number"
                         step="0.0001"
                         value={formData.location.lat}
-                        onChange={(e) => setFormData({ 
-                          ...formData, 
+                        onChange={(e) => setFormData({
+                          ...formData,
                           location: { ...formData.location, lat: parseFloat(e.target.value) || 0 }
                         })}
                       />
@@ -299,8 +313,8 @@ export default function VolunteersPage() {
                         type="number"
                         step="0.0001"
                         value={formData.location.lng}
-                        onChange={(e) => setFormData({ 
-                          ...formData, 
+                        onChange={(e) => setFormData({
+                          ...formData,
                           location: { ...formData.location, lng: parseFloat(e.target.value) || 0 }
                         })}
                       />
@@ -332,7 +346,7 @@ export default function VolunteersPage() {
               </DialogContent>
             </Dialog>
           </div>
-          
+
           {/* Volunteers Grid */}
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
             {filteredVolunteers.map(volunteer => (
@@ -368,12 +382,14 @@ export default function VolunteersPage() {
                           <Mail className="h-3 w-3" />
                           <span className="truncate">{volunteer.email}</span>
                         </div>
-                        <div className="flex items-center gap-2">
-                          <MapPin className="h-3 w-3" />
-                          <span>{volunteer.location.lat.toFixed(3)}, {volunteer.location.lng.toFixed(3)}</span>
-                        </div>
+                        {volunteer.location && volunteer.location.lat !== undefined && volunteer.location.lng !== undefined && (
+                          <div className="flex items-center gap-2">
+                            <MapPin className="h-3 w-3" />
+                            <span>{volunteer.location.lat.toFixed(3)}, {volunteer.location.lng.toFixed(3)}</span>
+                          </div>
+                        )}
                       </div>
-                      
+
                       {/* Skills */}
                       <div className="mt-3 flex flex-wrap gap-1">
                         {volunteer.skills.slice(0, 3).map(skill => (
@@ -387,7 +403,24 @@ export default function VolunteersPage() {
                           </Badge>
                         )}
                       </div>
-                      
+
+                      {/* Assigned Centers Display */}
+                      {volunteer.assignedCenters && volunteer.assignedCenters.length > 0 && (
+                        <div className="mt-3 flex flex-col gap-1">
+                          <p className="text-xs font-medium text-foreground">Relief Centers:</p>
+                          <div className="flex flex-wrap gap-1">
+                            {volunteer.assignedCenters.map(cid => {
+                              const center = centers.find(c => c.id === cid);
+                              return (
+                                <Badge key={cid} variant="outline" className="text-xs bg-blue-100 dark:bg-blue-900/30">
+                                  {center ? center.name : cid}
+                                </Badge>
+                              )
+                            })}
+                          </div>
+                        </div>
+                      )}
+
                       {/* Assigned Task */}
                       {volunteer.assignedTask && (
                         <div className="mt-3 p-2 rounded-lg bg-chart-3/10 border border-chart-3/20">
@@ -395,7 +428,7 @@ export default function VolunteersPage() {
                           <p className="text-xs text-muted-foreground truncate">{volunteer.assignedTask}</p>
                         </div>
                       )}
-                      
+
                       {/* Actions */}
                       <div className="mt-3 flex gap-2">
                         <Button
@@ -425,21 +458,21 @@ export default function VolunteersPage() {
               </Card>
             ))}
           </div>
-          
+
           {filteredVolunteers.length === 0 && (
             <Card className="p-12">
               <div className="text-center">
                 <Users className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
                 <h3 className="text-lg font-medium text-foreground">No Volunteers Found</h3>
                 <p className="text-sm text-muted-foreground mt-1">
-                  {searchTerm || statusFilter !== 'all' 
+                  {searchTerm || statusFilter !== 'all'
                     ? 'Try adjusting your search or filters'
                     : 'Add volunteers to get started'}
                 </p>
               </div>
             </Card>
           )}
-          
+
           {/* Edit Dialog */}
           <Dialog open={!!editingVolunteer} onOpenChange={(open) => !open && setEditingVolunteer(null)}>
             <DialogContent className="max-w-md">
@@ -504,6 +537,24 @@ export default function VolunteersPage() {
                         onClick={() => toggleSkill(skill)}
                       >
                         {skill}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+                <div className="grid gap-2">
+                  <label className="text-sm font-medium">Assigned Centers</label>
+                  <div className="flex flex-wrap gap-2">
+                    {centers.map(center => (
+                      <Badge
+                        key={center.id}
+                        variant={formData.assignedCenters?.includes(center.id) ? 'default' : 'outline'}
+                        className={cn(
+                          "cursor-pointer transition-colors",
+                          formData.assignedCenters?.includes(center.id) && "bg-blue-600 text-white"
+                        )}
+                        onClick={() => toggleCenter(center.id)}
+                      >
+                        {center.name}
                       </Badge>
                     ))}
                   </div>

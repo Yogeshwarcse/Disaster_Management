@@ -23,6 +23,8 @@ app.use((req, res, next) => {
 });
 
 // Routes
+import authRoutes from './routes/auth.js';
+app.use('/api/auth', authRoutes);
 app.use('/api', apiRoutes);
 
 // Health check

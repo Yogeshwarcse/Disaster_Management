@@ -26,19 +26,19 @@ import {
 } from '@/components/ui/select'
 import { Checkbox } from '@/components/ui/checkbox'
 import { useStore } from '@/lib/store'
-import { 
-  findNearestVolunteer, 
-  calculateDistance, 
+import {
+  findNearestVolunteer,
+  calculateDistance,
   PriorityQueue,
   generateRouteGraph,
   dijkstraShortestPath
 } from '@/lib/algorithms'
 import { WAREHOUSE_LOCATION } from '@/lib/mock-data'
-import { 
-  Truck, 
-  Package, 
-  MapPin, 
-  Users, 
+import {
+  Truck,
+  Package,
+  MapPin,
+  Users,
   Clock,
   CheckCircle,
   XCircle,
@@ -54,7 +54,7 @@ import { cn } from '@/lib/utils'
 function DispatchContent() {
   const searchParams = useSearchParams()
   const preselectedCenterId = searchParams.get('center')
-  
+
   const inventory = useStore((state) => state.inventory)
   const centers = useStore((state) => state.centers)
   const volunteers = useStore((state) => state.volunteers)
@@ -62,33 +62,33 @@ function DispatchContent() {
   const createDispatch = useStore((state) => state.createDispatch)
   const updateDispatchStatus = useStore((state) => state.updateDispatchStatus)
   const init = useStore((state) => state.init)
-  
+
   useEffect(() => {
     init()
   }, [])
-  
+
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
   const [selectedCenter, setSelectedCenter] = useState('')
   const [selectedItems, setSelectedItems] = useState([])
   const [showAlgorithmDetails, setShowAlgorithmDetails] = useState(false)
-  
+
   // Auto-dispatch state
   const [autoDispatchResult, setAutoDispatchResult] = useState(null)
-  
+
   // Priority Queue visualization
   const priorityQueue = useMemo(() => new PriorityQueue(centers), [centers])
   const prioritizedCenters = priorityQueue.getAll()
-  
+
   useEffect(() => {
     if (preselectedCenterId) {
       setSelectedCenter(preselectedCenterId)
       setIsCreateDialogOpen(true)
     }
   }, [preselectedCenterId])
-  
+
   const handleCreateDispatch = () => {
     if (!selectedCenter || selectedItems.length === 0) return
-    
+
     const dispatch = createDispatch(selectedCenter, selectedItems)
     if (dispatch) {
       setIsCreateDialogOpen(false)
@@ -96,7 +96,7 @@ function DispatchContent() {
       setSelectedItems([])
     }
   }
-  
+
   const toggleItem = (itemId, maxQuantity) => {
     setSelectedItems((prev) => {
       const existing = prev.find((i) => i.itemId === itemId)
@@ -106,21 +106,21 @@ function DispatchContent() {
       return [...prev, { itemId, quantity: Math.min(100, maxQuantity) }]
     })
   }
-  
+
   const updateItemQuantity = (itemId, quantity) => {
-    setSelectedItems((prev) => 
+    setSelectedItems((prev) =>
       prev.map((i) => i.itemId === itemId ? { ...i, quantity } : i)
     )
   }
-  
+
   // Run Smart Auto-Dispatch Algorithm
   const runAutoDispatch = () => {
     const topCenter = priorityQueue.peek()
     if (!topCenter) return
-    
+
     // Get required resources for top priority center
     const allocations = []
-    
+
     // Greedy allocation for each required resource
     topCenter.requiredResources.forEach((req) => {
       const item = inventory.find((i) => i.id === req.itemId)
@@ -148,14 +148,14 @@ function DispatchContent() {
         }
       }
     })
-    
+
     // Find nearest volunteer
     const nearestVol = findNearestVolunteer(volunteers, topCenter.location)
-    
+
     // Calculate route distance using Dijkstra
     const { nodes, edges } = generateRouteGraph(WAREHOUSE_LOCATION, centers)
     const { distance } = dijkstraShortestPath(nodes, edges, 'warehouse', topCenter.id)
-    
+
     setAutoDispatchResult({
       allocations,
       volunteer: nearestVol ? {
@@ -166,48 +166,48 @@ function DispatchContent() {
       routeDistance: distance
     })
   }
-  
+
   const executeAutoDispatch = () => {
     if (!autoDispatchResult || autoDispatchResult.allocations.length === 0) return
-    
+
     const alloc = autoDispatchResult.allocations[0]
     const items = alloc.items.map((i) => ({ itemId: i.itemId, quantity: i.quantity }))
     createDispatch(alloc.centerId, items)
     setAutoDispatchResult(null)
   }
-  
+
   const getStatusColor = (status) => {
     switch (status) {
       case 'delivered': return 'bg-primary/10 text-primary border-primary/20'
-      case 'in-transit': return 'bg-chart-2/10 text-chart-2 border-chart-2/20'
+      case 'out-for-delivery': return 'bg-chart-2/10 text-chart-2 border-chart-2/20'
+      case 'approved': return 'bg-blue-500/10 text-blue-500 border-blue-500/20'
       case 'pending': return 'bg-chart-3/10 text-chart-3 border-chart-3/20'
-      case 'cancelled': return 'bg-destructive/10 text-destructive border-destructive/20'
       default: return 'bg-muted text-muted-foreground'
     }
   }
-  
+
   const stats = {
     total: dispatches.length,
     pending: dispatches.filter((d) => d.status === 'pending').length,
-    inTransit: dispatches.filter((d) => d.status === 'in-transit').length,
-    delivered: dispatches.filter((d) => d.status === 'delivered').length,
-    cancelled: dispatches.filter((d) => d.status === 'cancelled').length
+    approved: dispatches.filter((d) => d.status === 'approved').length,
+    outForDelivery: dispatches.filter((d) => d.status === 'out-for-delivery').length,
+    delivered: dispatches.filter((d) => d.status === 'delivered').length
   }
-  
+
   const selectedCenterData = centers.find((c) => c.id === selectedCenter)
-  const availableVolunteer = selectedCenterData 
+  const availableVolunteer = selectedCenterData
     ? findNearestVolunteer(volunteers, selectedCenterData.location)
     : null
-  
+
   return (
     <div className="min-h-screen bg-background">
       <AppSidebar />
       <main className="pl-64">
-        <AppHeader 
-          title="Smart Dispatch System" 
+        <AppHeader
+          title="Smart Dispatch System"
           description="Automated resource allocation and volunteer assignment"
         />
-        
+
         <div className="p-6 space-y-6">
           {/* Stats */}
           <div className="grid gap-4 md:grid-cols-5">
@@ -233,14 +233,25 @@ function DispatchContent() {
                 </div>
               </CardContent>
             </Card>
+            <Card className="border-blue-500/50">
+              <CardContent className="p-4 flex items-center gap-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-500/10">
+                  <CheckCircle className="h-5 w-5 text-blue-500" />
+                </div>
+                <div>
+                  <p className="text-xl font-bold text-blue-500">{stats.approved}</p>
+                  <p className="text-xs text-muted-foreground">Approved</p>
+                </div>
+              </CardContent>
+            </Card>
             <Card className="border-chart-2/50">
               <CardContent className="p-4 flex items-center gap-3">
                 <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-chart-2/10">
                   <Truck className="h-5 w-5 text-chart-2" />
                 </div>
                 <div>
-                  <p className="text-xl font-bold text-chart-2">{stats.inTransit}</p>
-                  <p className="text-xs text-muted-foreground">In Transit</p>
+                  <p className="text-xl font-bold text-chart-2">{stats.outForDelivery}</p>
+                  <p className="text-xs text-muted-foreground">Out for Delivery</p>
                 </div>
               </CardContent>
             </Card>
@@ -255,19 +266,8 @@ function DispatchContent() {
                 </div>
               </CardContent>
             </Card>
-            <Card>
-              <CardContent className="p-4 flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-destructive/10">
-                  <XCircle className="h-5 w-5 text-destructive" />
-                </div>
-                <div>
-                  <p className="text-xl font-bold text-destructive">{stats.cancelled}</p>
-                  <p className="text-xs text-muted-foreground">Cancelled</p>
-                </div>
-              </CardContent>
-            </Card>
           </div>
-          
+
           <div className="grid gap-6 lg:grid-cols-3">
             {/* Smart Auto-Dispatch Panel */}
             <Card className="lg:col-span-1 border-primary/50">
@@ -314,7 +314,7 @@ function DispatchContent() {
                     ))}
                   </div>
                 </div>
-                
+
                 {/* Algorithm Details Toggle */}
                 <Button
                   variant="ghost"
@@ -324,7 +324,7 @@ function DispatchContent() {
                 >
                   {showAlgorithmDetails ? 'Hide' : 'Show'} Algorithm Details
                 </Button>
-                
+
                 {showAlgorithmDetails && (
                   <div className="rounded-lg bg-muted/50 p-3 text-xs space-y-2">
                     <p className="font-medium text-foreground">Algorithms Used:</p>
@@ -336,7 +336,7 @@ function DispatchContent() {
                     </ul>
                   </div>
                 )}
-                
+
                 {/* Run Auto-Dispatch */}
                 <Button
                   className="w-full"
@@ -346,12 +346,12 @@ function DispatchContent() {
                   <Play className="h-4 w-4 mr-2" />
                   Run Auto-Dispatch Analysis
                 </Button>
-                
+
                 {/* Auto-Dispatch Result */}
                 {autoDispatchResult && (
                   <div className="space-y-3 pt-4 border-t">
                     <p className="text-sm font-medium text-primary">Analysis Result:</p>
-                    
+
                     {autoDispatchResult.allocations.map((alloc) => (
                       <div key={alloc.centerId} className="rounded-lg border bg-primary/5 p-3 space-y-2">
                         <p className="text-sm font-medium">{alloc.centerName}</p>
@@ -365,19 +365,19 @@ function DispatchContent() {
                         </div>
                       </div>
                     ))}
-                    
+
                     {autoDispatchResult.volunteer && (
                       <div className="flex items-center justify-between text-sm">
                         <span className="text-muted-foreground">Nearest Volunteer:</span>
                         <span className="font-medium">{autoDispatchResult.volunteer.name}</span>
                       </div>
                     )}
-                    
+
                     <div className="flex items-center justify-between text-sm">
                       <span className="text-muted-foreground">Route Distance:</span>
                       <span className="font-mono">{autoDispatchResult.routeDistance?.toFixed(1) || '0.0'} km</span>
                     </div>
-                    
+
                     <Button
                       className="w-full"
                       onClick={executeAutoDispatch}
@@ -390,7 +390,7 @@ function DispatchContent() {
                 )}
               </CardContent>
             </Card>
-            
+
             {/* Manual Dispatch + Dispatch List */}
             <Card className="lg:col-span-2">
               <CardHeader className="flex flex-row items-center justify-between">
@@ -422,19 +422,19 @@ function DispatchContent() {
                           <div className={cn(
                             "flex h-10 w-10 items-center justify-center rounded-lg shrink-0",
                             dispatch.status === 'delivered' && "bg-primary/10",
-                            dispatch.status === 'in-transit' && "bg-chart-2/10",
-                            dispatch.status === 'pending' && "bg-chart-3/10",
-                            dispatch.status === 'cancelled' && "bg-destructive/10"
+                            dispatch.status === 'out-for-delivery' && "bg-chart-2/10",
+                            dispatch.status === 'approved' && "bg-blue-500/10",
+                            dispatch.status === 'pending' && "bg-chart-3/10"
                           )}>
                             <Truck className={cn(
                               "h-5 w-5",
                               dispatch.status === 'delivered' && "text-primary",
-                              dispatch.status === 'in-transit' && "text-chart-2",
-                              dispatch.status === 'pending' && "text-chart-3",
-                              dispatch.status === 'cancelled' && "text-destructive"
+                              dispatch.status === 'out-for-delivery' && "text-chart-2",
+                              dispatch.status === 'approved' && "text-blue-500",
+                              dispatch.status === 'pending' && "text-chart-3"
                             )} />
                           </div>
-                          
+
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center justify-between">
                               <h3 className="font-medium text-foreground">{dispatch.centerName}</h3>
@@ -442,7 +442,7 @@ function DispatchContent() {
                                 {dispatch.status.replace('-', ' ')}
                               </Badge>
                             </div>
-                            
+
                             <div className="mt-2 grid gap-2 sm:grid-cols-2 text-xs text-muted-foreground">
                               <div className="flex items-center gap-1">
                                 <Package className="h-3 w-3" />
@@ -461,21 +461,31 @@ function DispatchContent() {
                                 {new Date(dispatch.timestamp).toLocaleString()}
                               </div>
                             </div>
-                            
+
                             {/* Status Actions */}
-                            {(dispatch.status === 'pending' || dispatch.status === 'in-transit') && (
+                            {dispatch.status !== 'delivered' && (
                               <div className="mt-3 flex gap-2">
                                 {dispatch.status === 'pending' && (
                                   <Button
                                     size="sm"
                                     variant="outline"
-                                    onClick={() => updateDispatchStatus(dispatch.id, 'in-transit')}
+                                    onClick={() => updateDispatchStatus(dispatch.id, 'approved')}
+                                  >
+                                    <CheckCircle className="h-3 w-3 mr-1" />
+                                    Approve
+                                  </Button>
+                                )}
+                                {dispatch.status === 'approved' && (
+                                  <Button
+                                    size="sm"
+                                    variant="outline"
+                                    onClick={() => updateDispatchStatus(dispatch.id, 'out-for-delivery')}
                                   >
                                     <ArrowRight className="h-3 w-3 mr-1" />
                                     Start Transit
                                   </Button>
                                 )}
-                                {dispatch.status === 'in-transit' && (
+                                {dispatch.status === 'out-for-delivery' && (
                                   <Button
                                     size="sm"
                                     variant="outline"
@@ -485,15 +495,6 @@ function DispatchContent() {
                                     Mark Delivered
                                   </Button>
                                 )}
-                                <Button
-                                  size="sm"
-                                  variant="ghost"
-                                  className="text-destructive"
-                                  onClick={() => updateDispatchStatus(dispatch.id, 'cancelled')}
-                                >
-                                  <XCircle className="h-3 w-3 mr-1" />
-                                  Cancel
-                                </Button>
                               </div>
                             )}
                           </div>
@@ -505,7 +506,7 @@ function DispatchContent() {
             </Card>
           </div>
         </div>
-        
+
         {/* Manual Dispatch Dialog */}
         <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
           <DialogContent className="max-w-lg">
@@ -515,7 +516,7 @@ function DispatchContent() {
                 Select a relief center and resources to dispatch.
               </DialogDescription>
             </DialogHeader>
-            
+
             <div className="grid gap-4 py-4">
               {/* Center Selection */}
               <div className="grid gap-2">
@@ -541,7 +542,7 @@ function DispatchContent() {
                   </SelectContent>
                 </Select>
               </div>
-              
+
               {/* Selected Center Info */}
               {selectedCenterData && (
                 <div className="rounded-lg border bg-muted/50 p-3 text-sm">
@@ -559,7 +560,7 @@ function DispatchContent() {
                   </div>
                 </div>
               )}
-              
+
               {/* Resource Selection */}
               <div className="grid gap-2">
                 <label className="text-sm font-medium">Resources to Dispatch</label>
@@ -595,7 +596,7 @@ function DispatchContent() {
                 </div>
               </div>
             </div>
-            
+
             <DialogFooter>
               <Button variant="outline" onClick={() => setIsCreateDialogOpen(false)}>
                 Cancel

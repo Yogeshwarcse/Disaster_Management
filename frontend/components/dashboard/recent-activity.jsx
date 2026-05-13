@@ -8,27 +8,27 @@ import { cn } from '@/lib/utils'
 
 export function RecentActivity() {
   const dispatches = useStore(state => state.dispatches)
-  
+
   const recentDispatches = [...dispatches]
     .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
     .slice(0, 5)
-  
+
   const getStatusColor = (status) => {
     switch (status) {
       case 'delivered': return 'bg-primary/10 text-primary border-primary/20'
-      case 'in-transit': return 'bg-chart-2/10 text-chart-2 border-chart-2/20'
+      case 'out-for-delivery': return 'bg-chart-2/10 text-chart-2 border-chart-2/20'
+      case 'approved': return 'bg-blue-500/10 text-blue-500 border-blue-500/20'
       case 'pending': return 'bg-chart-3/10 text-chart-3 border-chart-3/20'
-      case 'cancelled': return 'bg-destructive/10 text-destructive border-destructive/20'
       default: return 'bg-muted text-muted-foreground'
     }
   }
-  
+
   const formatTimeAgo = (date) => {
     const now = new Date()
     const diff = now.getTime() - new Date(date).getTime()
     const hours = Math.floor(diff / (1000 * 60 * 60))
     const minutes = Math.floor(diff / (1000 * 60))
-    
+
     if (hours > 24) {
       return `${Math.floor(hours / 24)}d ago`
     } else if (hours > 0) {
@@ -37,7 +37,7 @@ export function RecentActivity() {
       return `${minutes}m ago`
     }
   }
-  
+
   return (
     <Card>
       <CardHeader>
@@ -63,11 +63,11 @@ export function RecentActivity() {
                 <div className={cn(
                   'flex h-8 w-8 items-center justify-center rounded-lg shrink-0',
                   dispatch.status === 'delivered' && 'bg-primary/10',
-                  dispatch.status === 'in-transit' && 'bg-chart-2/10',
-                  dispatch.status === 'pending' && 'bg-chart-3/10',
-                  dispatch.status === 'cancelled' && 'bg-destructive/10'
+                  dispatch.status === 'out-for-delivery' && 'bg-chart-2/10',
+                  dispatch.status === 'approved' && 'bg-blue-500/10',
+                  dispatch.status === 'pending' && 'bg-chart-3/10'
                 )}>
-                  {dispatch.status === 'in-transit' ? (
+                  {dispatch.status === 'out-for-delivery' || dispatch.status === 'approved' ? (
                     <Truck className="h-4 w-4 text-chart-2" />
                   ) : (
                     <Package className="h-4 w-4 text-muted-foreground" />

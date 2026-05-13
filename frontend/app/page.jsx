@@ -10,12 +10,12 @@ import { DemandSupplyChart } from '@/components/dashboard/demand-supply-chart'
 import { CriticalCentersList } from '@/components/dashboard/critical-centers-list'
 import { RecentActivity } from '@/components/dashboard/recent-activity'
 import { useStore } from '@/lib/store'
-import { 
-  Package, 
-  MapPin, 
-  Users, 
-  Truck, 
-  AlertTriangle, 
+import {
+  Package,
+  MapPin,
+  Users,
+  Truck,
+  AlertTriangle,
   TrendingUp,
   Activity,
   Heart
@@ -27,21 +27,21 @@ export default function DashboardPage() {
   const volunteers = useStore(state => state.volunteers)
   const dispatches = useStore(state => state.dispatches)
   const init = useStore(state => state.init)
-  
+
   useEffect(() => {
     init()
   }, [])
-  
+
   const stats = useMemo(() => {
     const totalInventory = inventory.reduce((sum, item) => sum + item.quantity, 0)
     const lowStockItems = inventory.filter((item) => item.quantity <= item.threshold).length
     const criticalCenters = centers.filter((c) => c.priorityScore >= 8).length
-    const activeDispatches = dispatches.filter((d) => d.status === 'in-transit' || d.status === 'pending').length
-    const averagePriorityScore = centers.length > 0 
+    const activeDispatches = dispatches.filter((d) => d.status === 'out-for-delivery' || d.status === 'approved' || d.status === 'pending').length
+    const averagePriorityScore = centers.length > 0
       ? (centers.reduce((sum, c) => sum + c.priorityScore, 0) / centers.length).toFixed(1)
       : '0'
     const totalPeopleServed = centers.reduce((sum, c) => sum + c.peopleCount, 0)
-    
+
     return {
       totalInventory,
       lowStockItems,
@@ -53,16 +53,16 @@ export default function DashboardPage() {
       totalPeopleServed
     }
   }, [inventory, centers, volunteers, dispatches])
-  
+
   return (
     <div className="min-h-screen bg-background">
       <AppSidebar />
       <main className="pl-64">
-        <AppHeader 
-          title="Dashboard" 
+        <AppHeader
+          title="Dashboard"
           description="Real-time overview of disaster relief operations"
         />
-        
+
         <div className="p-6 space-y-6">
           {/* Stats Grid */}
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -99,7 +99,7 @@ export default function DashboardPage() {
               variant={stats.activeDispatches > 5 ? 'warning' : 'default'}
             />
           </div>
-          
+
           {/* Secondary Stats */}
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
             <StatsCard
@@ -130,23 +130,23 @@ export default function DashboardPage() {
               variant="success"
             />
           </div>
-          
+
           {/* Charts Row */}
           <div className="grid gap-6 lg:grid-cols-2">
             <InventoryChart />
             <DispatchStatsChart />
           </div>
-          
+
           {/* Demand vs Supply */}
           <div className="grid gap-6 lg:grid-cols-3">
             <DemandSupplyChart />
             <CriticalCentersList />
           </div>
-          
+
           {/* Recent Activity */}
           <div className="grid gap-6 lg:grid-cols-2">
             <RecentActivity />
-            
+
             {/* Quick Actions */}
             <div className="rounded-xl border bg-card/80 backdrop-blur-md p-6 shadow-md ring-1 ring-white/5">
               <h3 className="text-base font-medium text-foreground mb-4">Quick Actions</h3>

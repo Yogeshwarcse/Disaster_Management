@@ -15,6 +15,11 @@ const centerSchema = new mongoose.Schema({
   capacity: { type: Number, required: true },
   peopleCount: { type: Number, required: true },
   requiredResources: [requiredResourceSchema],
+  inventory: [{
+    itemId: { type: String, required: true },
+    itemName: { type: String, required: true },
+    quantity: { type: Number, required: true }
+  }],
   shortageLevel: { type: Number, required: true },
   status: { type: String, enum: ['stable', 'active', 'critical'], default: 'active' },
   priorityScore: { type: Number, required: true }

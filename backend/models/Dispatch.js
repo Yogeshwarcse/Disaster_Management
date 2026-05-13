@@ -14,7 +14,7 @@ const dispatchSchema = new mongoose.Schema({
   volunteerId: { type: String, required: true },
   volunteerName: { type: String, required: true },
   routeDistance: { type: Number, required: true },
-  status: { type: String, enum: ['pending', 'in-transit', 'delivered', 'cancelled'], default: 'pending' },
+  status: { type: String, enum: ['pending', 'approved', 'out-for-delivery', 'delivered'], default: 'pending' },
   timestamp: { type: Date, default: Date.now },
   estimatedArrival: { type: Date }
 }, {
